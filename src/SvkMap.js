@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
         // position: "relative",
     },
     tooltip: {
-        position: "absolute",
+        position: "fixed",
         boxShadow: "0 8px 16px 0 rgba(0,0,0,1)",
         zIndex: 2000
     }
@@ -71,6 +71,15 @@ export function Map({ data, handleSelect, handleNoData, ...props }) {
     useEffect(() => {
         setColorPalette(chroma.scale([colorPair[0], colorPair[1]]).mode('hsl').colors(legendBuckets).map((item, index) => ({ color: item, limit: index * legendInterval })).reverse())
     }, [])
+
+    useEffect(() => {
+        const onScroll = e => {
+            setPosition({ x: undefined, y: undefined, region: undefined, value: undefined })
+        };
+        window.addEventListener("scroll", onScroll);
+    
+        return () => window.removeEventListener("scroll", onScroll);
+      }, []);
 
     function handleMapSelect(id) {
         setRegions(regions.map((item) => ({ ...item, selected: (item.id === id ? !item.selected : false) })))
@@ -139,9 +148,6 @@ export function Map({ data, handleSelect, handleNoData, ...props }) {
                 <svg
                     width="100%"
                     viewBox="0 0 290.36 144.18"
-                    onMouseLeave={e => {
-                        setPosition({ x: undefined, y: undefined, region: undefined, value: undefined })
-                    }}
                 >
                     <g>
                         {
@@ -163,6 +169,9 @@ export function Map({ data, handleSelect, handleNoData, ...props }) {
                                             region: okresy[path.id],
                                             // value: data[path.id] 
                                         })
+                                    }}
+                                    onMouseLeave={e => {
+                                        setPosition({ x: undefined, y: undefined, region: undefined, value: undefined })
                                     }}
                                 >
                                 </path>
