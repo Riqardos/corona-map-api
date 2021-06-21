@@ -1,6 +1,5 @@
-import { Box, Card, CardContent, ClickAwayListener, Divider, Fade, Grid, Popper, Slider, Snackbar, Typography, useMediaQuery } from '@material-ui/core';
+import { Box, Card, CardContent, ClickAwayListener, Divider, Fade, Grid, Popper, Slider, Typography, useMediaQuery } from '@material-ui/core';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import MuiAlert from '@material-ui/lab/Alert';
 import chroma from "chroma-js";
 import 'date-fns';
 import { ColorPicker } from 'material-ui-color';
@@ -16,10 +15,10 @@ const useStyles = makeStyles((theme) => ({
     path: {
         transition: "fill 0.3s ease-in-out 0.3s",
         cursor: "pointer",
-        stroke: theme.palette.text.primary,
-        // stroke: "black",
+        // stroke: theme.palette.text.primary,
+        stroke: "black",
         "&:hover": {
-            strokeWidth: "1px",
+            strokeWidth: "0.5px",
             stroke: theme.palette.text.primary
         }
 
@@ -45,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
 // }))(Tooltip);
 
 
-export function Map({ data, handleSelect, handleNoData, ...props }) {
+export function Map({ data, dataType, handleSelect, handleNoData, ...props }) {
 
     const classes = useStyles();
     const theme = useTheme();
@@ -55,35 +54,30 @@ export function Map({ data, handleSelect, handleNoData, ...props }) {
     const [legendBuckets, setLegendBuckets] = useState(9);
     const [colorPair, setColorPair] = useState(props.colorPair || ['#FFDFDF', "#430500"]);
     const [colorPalette, setColorPalette] = useState(chroma.scale([colorPair[0], colorPair[1]]).mode('hsl').colors(legendBuckets).map((item, index) => ({ color: item, limit: index * legendInterval })).reverse());
-    const [regions, setRegions] = useState(map.svg.g.path.map((item, index) => ({ id: item["-id"].replace('okres', ""), name: item["-id"], d: item["-d"], selected: false, color: defaultColor })))
-    const [districtName, setDistrictName] = useState(false);
-    const [dataAvailability, setDataAvailability] = useState(true);
+    const [regions, setRegions] = useState(map.svg.g.path.map((item, index) => ({ id: item["-id"].replace('district', ""), name: item["-id"], d: item["-d"], selected: false, color: defaultColor })))
     const [anchorEl, setAnchorEl] = useState(null);
     const [open, setOpen] = useState(false);
     const [position, setPosition] = useState({ x: undefined, y: undefined });
     const [selected, setSelected] = useState(false);
+
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
         setOpen(!open);
     };
 
-
     useEffect(() => {
         setColorPalette(chroma.scale([colorPair[0], colorPair[1]]).mode('hsl').colors(legendBuckets).map((item, index) => ({ color: item, limit: index * legendInterval })).reverse())
-    }, [])
-
-    useEffect(() => {
         const onScroll = e => {
             setPosition({ x: undefined, y: undefined, region: undefined, value: undefined })
         };
         window.addEventListener("scroll", onScroll);
-    
+
         return () => window.removeEventListener("scroll", onScroll);
-      }, []);
+        // eslint-disable-next-line
+    }, [])
 
     function handleMapSelect(id) {
         setRegions(regions.map((item) => ({ ...item, selected: (item.id === id ? !item.selected : false) })))
-
     }
 
     function handleColorPalette(n_colors, interval, colorPair) {
@@ -104,15 +98,18 @@ export function Map({ data, handleSelect, handleNoData, ...props }) {
         else {
             handleSelect(select)
         }
+        // eslint-disable-next-line
     }, [regions])
 
     useEffect(() => {
-        if (data) {
+        if (Object.keys(data).length !== 0) {
             setRegions(regions.map((item, id) => {
-                const regionValue = (parseInt(data[item.id]));
+                const regionValue = (parseFloat(data[item.id]));
                 return {
                     ...item,
-                    color: (regionValue == -1) ? theme.palette.background.paper : colorPalette.find((col) => col.limit <= regionValue).color
+                    color: isNaN(regionValue)
+                        ? theme.palette.background.paper
+                        : colorPalette.find((col) => col.limit <= regionValue).color
                 }
             }))
             let region = regions.find(region => region.selected)
@@ -121,15 +118,14 @@ export function Map({ data, handleSelect, handleNoData, ...props }) {
             }
         }
         else {
-            setDataAvailability(false)
             setRegions(regions.map((item, id) => ({ ...item, color: theme.palette.background.paper })))
         }
+        // eslint-disable-next-line
     }, [colorPalette, data])
 
 
     return (
         <>
-            {/* {console.log("render")} */}
             <div className={classes.root} >
                 {position.x &&
                     <Card className={classes.tooltip}
@@ -138,8 +134,11 @@ export function Map({ data, handleSelect, handleNoData, ...props }) {
                             top: position.y - 80
                         }}>
                         <CardContent>
-                            <Typography
-                            >{position.region.title}
+                            <Typography>
+                                {position.region.title}
+                            </Typography>
+                            <Typography>
+                                {`${dataType}: ${position.data}`}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -154,10 +153,10 @@ export function Map({ data, handleSelect, handleNoData, ...props }) {
                             regions.map((path, index) =>
 
                                 <path key={`path${index}`} d={path.d}
-                                    fill={selected ? (path.selected ? path.color : chroma(path.color).darken(2)) : path.color}
+                                    fill={selected ? (path.selected ? path.color : chroma(path.color).darken(1)) : path.color}
                                     // fill={path.selected ? path.color : chroma(path.color).darken(2) }
                                     className={classes.path}
-                                    strokeWidth={path.selected ? "2px" : "0.5px"}
+                                    strokeWidth={path.selected ? "0.5px" : "0.1px"}
                                     onClick={(event) => {
                                         handleMapSelect(path.id)
                                     }}
@@ -167,6 +166,7 @@ export function Map({ data, handleSelect, handleNoData, ...props }) {
                                             x: e.clientX,
                                             y: e.clientY,
                                             region: okresy[path.id],
+                                            data: data[path.id]
                                             // value: data[path.id] 
                                         })
                                     }}
@@ -233,9 +233,9 @@ export function Map({ data, handleSelect, handleNoData, ...props }) {
                                             aria-labelledby="Interval"
                                             valueLabelDisplay="auto"
                                             value={legendInterval}
-                                            step={10}
+                                            step={1}
                                             marks
-                                            min={10}
+                                            min={1}
                                             max={100}
                                             onChange={(event, newValue) => { setLegendInterval(newValue) }}
                                         />
@@ -288,11 +288,6 @@ export function Map({ data, handleSelect, handleNoData, ...props }) {
                     )}
                 </Popper>
 
-                <Snackbar open={!dataAvailability} autoHideDuration={6000} onClose={() => setDataAvailability(true)}>
-                    <MuiAlert elevation={6} variant="filled" onClose={() => setDataAvailability(true)} severity="warning">
-                        Missing data!
-                </MuiAlert>
-                </Snackbar>
             </div>
         </>
     )
