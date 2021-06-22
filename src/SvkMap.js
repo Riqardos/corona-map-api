@@ -23,6 +23,12 @@ const useStyles = makeStyles((theme) => ({
         }
 
     },
+    dividerMargin:{
+        margin: "5px 0"
+    },
+    bold:{
+        fontWeight:"bold"
+    },
     root: {
         // position: "relative",
     },
@@ -44,14 +50,14 @@ const useStyles = makeStyles((theme) => ({
 // }))(Tooltip);
 
 
-export function Map({ data, dataType, handleSelect, handleNoData, ...props }) {
+export function Map({ data, handleSelect, handleNoData, ...props }) {
 
     const classes = useStyles();
     const theme = useTheme();
     const matches = useMediaQuery(theme.breakpoints.up('lg'));
     const defaultColor = chroma("white");
-    const [legendInterval, setLegendInterval] = useState(10);
-    const [legendBuckets, setLegendBuckets] = useState(9);
+    const [legendInterval, setLegendInterval] = useState(props.legendInterval[0]);
+    const [legendBuckets, setLegendBuckets] = useState(props.legendInterval[1]);
     const [colorPair, setColorPair] = useState(props.colorPair || ['#FFDFDF', "#430500"]);
     const [colorPalette, setColorPalette] = useState(chroma.scale([colorPair[0], colorPair[1]]).mode('hsl').colors(legendBuckets).map((item, index) => ({ color: item, limit: index * legendInterval })).reverse());
     const [regions, setRegions] = useState(map.svg.g.path.map((item, index) => ({ id: item["-id"].replace('district', ""), name: item["-id"], d: item["-d"], selected: false, color: defaultColor })))
@@ -59,6 +65,12 @@ export function Map({ data, dataType, handleSelect, handleNoData, ...props }) {
     const [open, setOpen] = useState(false);
     const [position, setPosition] = useState({ x: undefined, y: undefined });
     const [selected, setSelected] = useState(false);
+
+    useEffect(()=>{
+        setLegendInterval(props.legendInterval[0]);
+        setLegendBuckets(props.legendInterval[1]);
+        setColorPair(props.colorPair);
+    }, [props.legendInterval, props.colorPair])
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -77,7 +89,7 @@ export function Map({ data, dataType, handleSelect, handleNoData, ...props }) {
     }, [])
 
     function handleMapSelect(id) {
-        setRegions(regions.map((item) => ({ ...item, selected: (item.id === id ? !item.selected : false) })))
+        // setRegions(regions.map((item) => ({ ...item, selected: (item.id === id ? !item.selected : false) })))
     }
 
     function handleColorPalette(n_colors, interval, colorPair) {
@@ -104,7 +116,8 @@ export function Map({ data, dataType, handleSelect, handleNoData, ...props }) {
     useEffect(() => {
         if (Object.keys(data).length !== 0) {
             setRegions(regions.map((item, id) => {
-                const regionValue = (parseFloat(data[item.id]));
+
+                const regionValue = (parseFloat(data[item.id]?.primary));
                 return {
                     ...item,
                     color: isNaN(regionValue)
@@ -134,12 +147,21 @@ export function Map({ data, dataType, handleSelect, handleNoData, ...props }) {
                             top: position.y - 80
                         }}>
                         <CardContent>
-                            <Typography>
+                            <Typography >
                                 {position.region.title}
                             </Typography>
-                            <Typography>
-                                {`${dataType}: ${position.data}`}
-                            </Typography>
+                            <Divider className={classes.dividerMargin}/>
+                            <Typography className={classes.bold}>
+                                {`Value: ${position.data?.primary}`}
+                            </Typography>  
+                            {/* <Divider/> */}
+
+                            {position.data?.secondary && Object.entries(position.data?.secondary).map(([key,value], index) => {
+                                return (
+                                    <Typography key={`value${index}`}> {`${key}: ${value}`}
+                                    </Typography>
+                                )
+                            })}
                         </CardContent>
                     </Card>
                 }
