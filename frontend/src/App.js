@@ -14,7 +14,11 @@ import './App.css';
 import { Map } from './SvkMap';
 
 
-
+export const myAxios = axios.create({
+  timeout: 4000,
+  // backend IP
+  baseURL: (window.env?.API_URL) || "http://localhost:8080/https://data.korona.gov.sk/api"
+});
 
 
 // import { corData } from '../data/out';
@@ -54,15 +58,13 @@ function App() {
     let apiDate = moment(selectedDate).format('YYMMDD').toString()
     let conf = {
       method: "get",
-      baseURL: "http://localhost:8080/https://data.korona.gov.sk/api",
       url: url,
-      // url: "https://data.korona.gov.sk/api/ag-tests/by-district",
       params: {
         offset: apiDate + '0080',
       },
       headers: { "Access-Control-Allow-Origin": "*" }
     }
-    axios(conf)
+    myAxios(conf)
       .then(res => {
         let result = res.data.page.filter(item => (item.published_on === moment(selectedDate).format('YYYY-MM-DD').toString()))
           .reduce((acc, item, index) => {
@@ -112,22 +114,23 @@ function App() {
         );
         break;
       case 1:
-        setColorPair(['#FF0000','#FFFFFF']);
+        setColorPair(['#FF0000', '#FFFFFF']);
         setLegendInterval([100, 6]);
         getData(
           "/hospital-beds/by-district",
           'free_all',
           {
-          "capacity_all": "Total capacity",
-          "capacity_covid": "Covid capicity",
-          "occupied_jis_covid": "JIS occupied",
-          "occupied_oaim_covid": "OAIM occupied",
-          "occupied_o2_covid": "Oxygen occupied",
-          "occupied_other_covid": "Other",}
+            "capacity_all": "Total capacity",
+            "capacity_covid": "Covid capicity",
+            "occupied_jis_covid": "JIS occupied",
+            "occupied_oaim_covid": "OAIM occupied",
+            "occupied_o2_covid": "Oxygen occupied",
+            "occupied_other_covid": "Other",
+          }
         );
         break;
       case 2:
-        setColorPair(['#FF0000','#FFFFFF']);
+        setColorPair(['#FF0000', '#FFFFFF']);
         setLegendInterval([1, 9]);
         getData(
           "/hospital-patients/by-district",
@@ -135,7 +138,8 @@ function App() {
           {
             "ventilated_covid": "Number of ventilated patients",
             "non_covid": "Number of non-covid patients",
-            "suspected_covid": "Number of suspected covid patients",}
+            "suspected_covid": "Number of suspected covid patients",
+          }
         );
         break;
       default:
@@ -146,17 +150,17 @@ function App() {
 
   useEffect(() => {
     setColorPair(['#FFFFFF', '#FF0000']);
-        setLegendInterval([100, 10]);
-        getData(
-          "/ag-tests/by-district",
-          'positivity_rate',
-          {
-            positives_count: "Number of positive tests",
-            negatives_count: "Number of negative tests",
-            positives_sum: "Sum of positive tests",
-            negatives_sum: "Sum of negative tests"
-          }
-        );
+    setLegendInterval([100, 10]);
+    getData(
+      "/ag-tests/by-district",
+      'positivity_rate',
+      {
+        positives_count: "Number of positive tests",
+        negatives_count: "Number of negative tests",
+        positives_sum: "Sum of positive tests",
+        negatives_sum: "Sum of negative tests"
+      }
+    );
     // eslint-disable-next-line
   }, [])
 
