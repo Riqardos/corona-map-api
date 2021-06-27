@@ -10,3 +10,10 @@ services:
         ports:
             - ${FRONTEND_CONTAINER_PORT}:80
         env_file: .env
+#     cors:
+#         image: redocly/cors-anywhere
+#         env_file: .env
+
+# networks:
+#     cors-network:
+#         driver: bridge

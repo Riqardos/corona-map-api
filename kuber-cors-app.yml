@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: corona-cors-app
+  labels:
+    purpose: corona
+spec:
+  containers:
+    - name: corona-cors-app
+      image: de.icr.io/muni_coronamap/muni_coronamap@sha256:61284ac5dec12c3eea2b5f607707ccbe5a807457a86735c1bb8eb5a02b8b8d0b
