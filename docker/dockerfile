@@ -12,7 +12,14 @@ RUN npm run-script build
 # The second stage
 # Copy React static files and start nginx
 FROM nginx:stable-alpine
+RUN apk --update add bash && \
+    apk add dos2unix
+
 COPY ./docker/config /etc/nginx/conf.d
 COPY --from=build /app/frontend/build /usr/share/nginx/html
 RUN chmod +x /etc/nginx/conf.d/entrypoint.sh
+
+# https://stackoverflow.com/questions/53165471/building-docker-images-on-windows-entrypoint-script-no-such-file-or-directory
+RUN dos2unix /etc/nginx/conf.d/entrypoint.sh
+
 CMD ["/etc/nginx/conf.d/entrypoint.sh"]
