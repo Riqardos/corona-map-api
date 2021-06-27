@@ -1,5 +1,16 @@
-# Documentation
+# Corona visualisation app
+Basic web-app visualisationing corona stats in Slovakia. Data from [NCZI](https://data.korona.gov.sk/).
 
+Data types:
+- Ag tests
+- Hospital beds
+- Patients in hospital
+
+## Localhost test
+- install docker and docker-compose
+- run `docker-compose up` - builds and starts containers
+
+## IBM cloud
 # Prerequisities
 - IBMcloud CLI installed
 - container registry installed - `ibmcloud plugin install container-registry`
