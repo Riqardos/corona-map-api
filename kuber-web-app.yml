@@ -7,7 +7,7 @@ metadata:
 spec:
   containers:
     - name: corona-web-app
-      image: de.icr.io/muni_coronamap/muni_coronamap@sha256:48be692495ebf139b27a5b32ab337d251391bd13822c43079c67875238d45332
+      image: de.icr.io/muni_coronamap/web-api@sha256:256b62a57e89da25107cb7c254780031b8e8ab02454221a0720758fb04696c78
       env:
         - name: REACT_APP_BASE_URL
-          value: http://169.51.203.137:32324/https://data.korona.gov.sk/api
+          value: http://169.51.203.137:32295/https://data.korona.gov.sk/api

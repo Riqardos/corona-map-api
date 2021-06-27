@@ -7,4 +7,4 @@ metadata:
 spec:
   containers:
     - name: corona-cors-app
-      image: de.icr.io/muni_coronamap/muni_coronamap@sha256:61284ac5dec12c3eea2b5f607707ccbe5a807457a86735c1bb8eb5a02b8b8d0b
+      image: de.icr.io/muni_coronamap/cors_service@sha256:f70cba287d76a1031ee8aa453f9fdb83e7bf65aff7c226960b1886a060e80def
